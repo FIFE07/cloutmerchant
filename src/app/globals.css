@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+/*
+ * CLOUTMERCHANT design tokens (spec §8)
+ * - Deep charcoal sections + warm off-white surfaces
+ * - One bold accent: electric amber. One supporting accent: teal green.
+ * - No purple-blue gradients. WCAG AA contrast targets.
+ */
+
+@theme {
+  /* Surfaces */
+  --color-charcoal-950: #101014;
+  --color-charcoal-900: #14151a;
+  --color-charcoal-800: #1d1f26;
+  --color-charcoal-700: #2a2d37;
+  --color-cream-50: #faf7f2;
+  --color-cream-100: #f4efe7;
+  --color-cream-200: #e8e1d4;
+
+  /* Primary accent — electric amber */
+  --color-amber-glow-300: #ffd166;
+  --color-amber-glow-400: #ffb300;
+  --color-amber-glow-500: #f59e0b;
+  --color-amber-glow-600: #d97706;
+
+  /* Supporting accent — teal green */
+  --color-teal-pop-300: #5eead4;
+  --color-teal-pop-400: #2dd4bf;
+  --color-teal-pop-500: #0fa3a3;
+  --color-teal-pop-600: #0d8288;
+
+  /* Semantic */
+  --color-surface: var(--color-cream-50);
+  --color-surface-raised: #ffffff;
+  --color-ink: #17181d;
+  --color-ink-muted: #555963;
+  --color-ink-on-dark: #f5f3ee;
+  --color-ink-on-dark-muted: #a7abb8;
+  --color-accent: var(--color-amber-glow-400);
+  --color-accent-strong: var(--color-amber-glow-600);
+  --color-support: var(--color-teal-pop-500);
+
+  --font-display: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-card: 1.25rem;
+
+  --animate-shimmer: shimmer 2.4s linear infinite;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* Respect users who prefer reduced motion (spec §8) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Forms must never be obscured by mobile keyboards or clipped at 360px (spec §5, §8) */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
+
+input,
+select,
+textarea {
+  font-size: 16px; /* prevents iOS Safari auto-zoom that breaks layouts */
+}
