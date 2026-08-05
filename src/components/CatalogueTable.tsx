@@ -20,12 +20,16 @@ export type CatalogueService = {
 export function CatalogueTable({
   services,
   platforms,
+  initialPlatform = "all",
+  initialQuery = "",
 }: {
   services: CatalogueService[];
   platforms: { slug: string; name: string }[];
+  initialPlatform?: string;
+  initialQuery?: string;
 }) {
-  const [query, setQuery] = useState("");
-  const [platform, setPlatform] = useState<string>("all");
+  const [query, setQuery] = useState(initialQuery);
+  const [platform, setPlatform] = useState<string>(initialPlatform);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();

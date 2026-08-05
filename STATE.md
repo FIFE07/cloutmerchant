@@ -101,3 +101,22 @@ Append one dated entry per work session: built / verified / blocked / next.
 
 **Next action**
 - QA pass on a 360px viewport + the Week 1 gate checklist (stranger signup flow), then mega-menu polish; Week 2 kickoff is Paystack (needs owner click-by-click to create the account).
+
+---
+
+## 2026-08-05 — Session 4 (mega-menu + owner preview crash fix)
+
+**Built**
+- **Services mega-menu** (spec §14, owner-requested): full-width desktop panel with one column per platform fed live from the database; each service type links to a pre-filtered `/services?platform=…&q=…`; hover reveals one-line description + starting price; closes on Escape and outside click. Mobile: hamburger drawer with per-platform accordions, visible close button AND backdrop tap (no trap).
+- `/services` now reads `platform` and `q` URL params so menu deep-links land pre-filtered.
+- `START-WEBSITE.bat` is now self-healing: deletes stale `.next` temp files before every start.
+
+**Root cause of the owner's 500 crash (recorded so it never repeats)**
+- I ran `rm -rf .next && npm run build` while the owner's dev server was running from the same folder — it scrambled the dev server's runtime chunks (`Cannot find module './331.js'`). **Rule going forward: never run production builds or delete `.next` while the owner's dev server is up.** Owner fix: restart via the bat (now self-cleaning).
+
+**Verified**
+- Build: 15/15 routes compile clean.
+- Live dev-server check: `/` 200, `/services?platform=instagram&q=Followers` 200, menu data (Followers/Telegram/platform links) present in the page payload sent to the browser. Test server stopped afterwards.
+
+**Next action**
+- Owner refreshes via the bat; then Week 1 gate QA (360px viewport + stranger signup), then Week 2 Paystack (owner click-by-click needed).

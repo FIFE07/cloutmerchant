@@ -11,7 +11,12 @@ export const metadata: Metadata = {
 
 export const revalidate = 60;
 
-export default async function ServicesPage() {
+export default async function ServicesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ platform?: string; q?: string }>;
+}) {
+  const { platform = "all", q = "" } = await searchParams;
   const supabase = await createClient();
 
   const { data: categories } = await supabase
@@ -56,6 +61,8 @@ export default async function ServicesPage() {
           <CatalogueTable
             services={rows}
             platforms={(categories ?? []).map((c) => ({ slug: c.slug, name: c.name }))}
+            initialPlatform={platform}
+            initialQuery={q}
           />
         </div>
         <p className="mt-6 text-xs leading-relaxed text-ink-muted">

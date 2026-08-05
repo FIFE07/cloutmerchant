@@ -1,19 +1,58 @@
 import Link from "next/link";
 import { Logo } from "@/components/Logo";
+import { ServicesMegaMenu, MobileNav, type MegaMenuColumn } from "@/components/MegaMenu";
+import { createClient } from "@/lib/supabase/server";
 
-/**
- * Public site header. The full services mega-menu lands in Week 3;
- * for now Services links straight to the catalogue.
- */
-export function SiteHeader() {
+/** Short platform word used to strip prefixes: "Instagram Followers" → "Followers". */
+const SHORT_NAME: Record<string, string> = {
+  instagram: "Instagram",
+  tiktok: "TikTok",
+  youtube: "YouTube",
+  x: "X",
+  facebook: "Facebook",
+  telegram: "Telegram",
+};
+
+async function getMenuColumns(): Promise<MegaMenuColumn[]> {
+  const supabase = await createClient();
+  const { data: categories } = await supabase
+    .from("service_categories")
+    .select("id, name, slug")
+    .eq("is_active", true)
+    .order("sort_order");
+  const { data: services } = await supabase
+    .from("services")
+    .select("name, description, price_per_1000_kobo, category_id")
+    .eq("is_active", true)
+    .order("sort_order");
+
+  return (categories ?? []).map((cat) => {
+    const short = SHORT_NAME[cat.slug] ?? cat.name;
+    const items = (services ?? [])
+      .filter((s) => s.category_id === cat.id)
+      .map((s) => {
+        const label = s.name.replace(short, "").trim() || s.name;
+        return {
+          label,
+          description: s.description.replace(/^Demo catalogue entry\.\s*/i, ""),
+          fromPriceKobo: s.price_per_1000_kobo as number,
+          href: `/services?platform=${cat.slug}&q=${encodeURIComponent(label)}`,
+        };
+      });
+    return { name: cat.name, slug: cat.slug, items };
+  });
+}
+
+/** Public site header with the services mega-menu (spec §14). */
+export async function SiteHeader() {
+  const columns = await getMenuColumns();
+
   return (
     <header className="sticky top-0 z-40 border-b border-cream-200 bg-cream-50/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Logo />
         <nav className="hidden items-center gap-7 text-sm font-medium text-ink-muted md:flex">
-          <Link href="/services" className="transition hover:text-ink">
-            Services
-          </Link>
+          <ServicesMegaMenu columns={columns} />
           <Link href="/services#pricing" className="transition hover:text-ink">
             Pricing
           </Link>
@@ -34,6 +73,7 @@ export function SiteHeader() {
           >
             Get started
           </Link>
+          <MobileNav columns={columns} />
         </div>
       </div>
     </header>
