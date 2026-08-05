@@ -30,6 +30,12 @@ Append one dated entry per work session: built / verified / blocked / next.
 
 ---
 
+## 2026-08-05 — Session 2b (preview help for owner)
+
+- Owner still saw "couldn't start the website" — the earlier preview cards pointed to the pre-move folder (no longer exists). Added **`START-WEBSITE.bat`** in the project root: owner double-clicks it, a browser opens at `http://localhost:7100/` automatically after ~15s; closing the black window stops the site. Port 7100 confirmed free; `node` confirmed at `C:\Program Files\nodejs`. This is now the owner-proof way to view the site, independent of the preview-card system.
+
+---
+
 ## 2026-08-05 — Session 1 (Week 1 kickoff)
 
 **Built**
