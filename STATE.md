@@ -80,3 +80,24 @@ Append one dated entry per work session: built / verified / blocked / next.
 | LLM API (assistant) | ~$5–30/mo PAYG | Week 3 | Not created |
 | AI build assistance | ~$39–90/mo during build | Now | Active |
 | **Total to launch** | **~$150–250 one-off + ~$0–50/mo** | | |
+
+---
+
+## 2026-08-05 — Session 3 (Week 1 public site + auth, live-tested)
+
+**Built**
+- Public site: landing `/` (hero, live category grid from the database, how-it-works, honesty strip, CTAs), `/services` catalogue (search + platform chips mirroring nav grouping, public prices, order button routes to signup), `/terms`, `/privacy` (UK GDPR), `/refunds`, `/faq` — all original copy with the honesty language required by brief §2.
+- Auth: `/signup` (email confirm, show/hide password eye, consent line), `/login` (warm error mapping, never raw API errors), `/forgot-password` (no account enumeration), `/auth/callback` (app-owned confirmation landing exchanging the code for a session), minimal `/app` dashboard (wallet card + sign out; logged-out visitors redirect to login).
+- Shared chrome: header/footer, original spark wordmark logo, Naira/kobo format helpers.
+- `scripts/auth-smoke-test.mjs` — repeatable live signup test.
+- eslint: disabled `react/no-unescaped-entities` (plain apostrophes in copy are fine; escaping would make legal/marketing copy unmaintainable).
+
+**Verified (live, not assumed)**
+- `npm run build` — all 11 routes compile clean (static where possible; `/app` and `/services` server-rendered).
+- Real signup against the live project: user created, **email confirmation required = true**, and the `handle_new_user` trigger created the profile row with correct display_name/role/₦0 balance. Test user then deleted (0 smoke users remain).
+- The owner's `START-WEBSITE.bat` session hot-reloads these pages automatically.
+
+**Blocked** — nothing for Week 1 remaining items.
+
+**Next action**
+- QA pass on a 360px viewport + the Week 1 gate checklist (stranger signup flow), then mega-menu polish; Week 2 kickoff is Paystack (needs owner click-by-click to create the account).

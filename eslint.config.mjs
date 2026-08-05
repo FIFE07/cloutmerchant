@@ -20,6 +20,13 @@ const eslintConfig = [
       "next-env.d.ts",
     ],
   },
+  {
+    rules: {
+      // Plain apostrophes/quotes in marketing & legal copy are fine in the
+      // browser; escaping them all would make the copy unmaintainable.
+      "react/no-unescaped-entities": "off",
+    },
+  },
 ];
 
 export default eslintConfig;
