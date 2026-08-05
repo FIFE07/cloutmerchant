@@ -4,6 +4,32 @@ Append one dated entry per work session: built / verified / blocked / next.
 
 ---
 
+## 2026-08-05 — Session 2 (database live, preview fixed)
+
+**Built**
+- Fixed preview failure: middleware now skips session refresh when Supabase env vars are absent (was 500-ing every page before the database existed).
+- Created Supabase project **`cloutmerchant`** (ref `pkvudcnbohfwuekcupxi`, eu-west-1, free tier $0/mo) in the owner's existing org — 100% separate database/users/keys from Moor Sports and FIFE.
+- Applied migration 0001 to the live database.
+- `.env.local` written with project URL + anon key (gitignored). Service-role key intentionally left empty until Week 2 webhooks.
+- `scripts/rls-negative-test.mjs` — repeatable Sentinel RLS test (11 checks).
+
+**Verified (live)**
+- Schema: 6 categories, 25 demo services, **10/10 tables have RLS enabled**, 9 security-definer functions.
+- RLS negative tests: **11/11 PASS** — anonymous client sees 0 rows of orders/transactions/profiles/tickets/notifications/audit_log; can read the public catalogue; `credit_wallet` is permission-denied for non-service roles.
+- Preview: dev server serves the home page **HTTP 200** on port 7100 (the earlier "couldn't start" error was the missing env vars, now fixed and server stopped after the test).
+
+**Owner decisions recorded**
+- Fulfilment: no existing provider account → plan wholesale provider APIs (Phase 3).
+- Database hosting: option (a) — new project inside existing Supabase login.
+
+**Blocked**
+- Nothing for Week 1 page work. (Week 2 will need owner click-by-click: Paystack account.)
+
+**Next action**
+- Auth flow (signup → email confirm → `/auth/callback` → login → reset), then landing/catalogue/legal pages, all against the live database.
+
+---
+
 ## 2026-08-05 — Session 1 (Week 1 kickoff)
 
 **Built**
