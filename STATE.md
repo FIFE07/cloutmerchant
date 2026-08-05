@@ -21,6 +21,11 @@ Append one dated entry per work session: built / verified / blocked / next.
 **Supabase discovery**
 - Connected Supabase account has exactly one existing project: `moorsportsagency@gmail.com's Project` (eu-west-1, ACTIVE_HEALTHY) — belongs to a different venture; will NOT be reused for CLOUTMERCHANT.
 
+**Owner directives (2026-08-05)**
+- TOTAL separation from FIFE: project relocated from the FIFE workspace to its own top-level folder `C:\Users\DELL\Documents\CLOUTMERCHANT` (moved + build re-verified there). Separate git repo, separate future Supabase project/database/keys. Owner is willing to use a NEW email + new accounts for CLOUTMERCHANT.
+- Owner is a novice: no command-prompt steps in the normal flow; everything must be as automated as possible (payments, keys, fulfilment).
+- Owner asked about "Owelet" (likely The Owlet, a Nigerian SMM/bills platform) — either reuse that payment style or pull service plans automatically. Clarifying question sent: automation via official wholesale provider APIs is the compliant route; cloning another site's catalogue is not (brief §2).
+
 **Blocked (owner actions)**
 1. Confirm creation of a NEW Supabase project named `cloutmerchant` (free tier; suggest eu-west-1, or af-south-1 Cape Town if you prefer nearest-to-Nigeria latency) so migration 0001 can be applied and RLS negative tests run.
 2. Domain, Paystack/Stripe, Resend, LLM key — needed at Weeks 2–4, see plan.md.
