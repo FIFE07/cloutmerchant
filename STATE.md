@@ -120,3 +120,29 @@ Append one dated entry per work session: built / verified / blocked / next.
 
 **Next action**
 - Owner refreshes via the bat; then Week 1 gate QA (360px viewport + stranger signup), then Week 2 Paystack (owner click-by-click needed).
+
+---
+
+## 2026-08-20 — Session 5 (fulfilment automation: Owlet recon + provider engine built)
+
+**Recon findings (via live browser session with owner's Owlet login)**
+- Owlet account works on the NEW site (the-owlet.com): logged in OK (user `nnadoz`, member since 2021, 4 past orders, 3% discount tier).
+- Owlet's API is the **industry-standard SMM panel API v2** — POST form fields `{key, action}` to `https://theowlet.com/api/v2` with actions: services / add / status / refill / cancel / balance. Public docs confirmed at theowlet.com/api.
+- **Blocked on key:** the NEW site has no API-key UI yet (account data shows `apiKey: ""`, `isReseller: false`); the key is issued on the CLASSIC site (theowlet.com → Account), but the classic site rejects the current password ("Incorrect username or password" with both username and email). Needs a classic-site password reset via the owner's email.
+- JAP (justanotherpanel.com) speaks the same v2 protocol — same client works.
+
+**Built**
+- `src/lib/providers/panelv2.ts` — one typed client for all v2 providers; `owlet()` and `jap()` factories; server-only keys from env; services/add/status/balance/refill/cancel.
+- `scripts/provider-test.mjs` — live connectivity test (balance + service count per provider).
+- `.env.example` — OWLET_API_KEY / JAP_API_KEY documented as server-only.
+
+**Verified**
+- `tsc --noEmit` clean; provider-test runs and correctly SKIPs until keys exist.
+- Owlet API endpoint live: `POST /api/v2 {action:services}` → `{"error":"Invalid API key"}` (protocol confirmed).
+
+**Blocked (owner, ~10 min)**
+1. Owlet API key: reset classic-site password → theowlet.com → Account → copy API key → paste to me (instructions sent in chat).
+2. Optional second provider: JAP account + API key.
+
+**Next action**
+- Once key lands: provider-test goes green → sync Owlet catalogue into `services` (provider_service_id mapping, auto margin pricing) → auto-forward paid orders → status polling back into order tracking.
