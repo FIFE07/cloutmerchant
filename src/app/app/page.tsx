@@ -1,65 +1,51 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { PanelNav } from "@/components/PanelNav";
+import { NewOrderForm } from "@/components/NewOrderForm";
 import { formatNairaFromKobo } from "@/lib/format";
-import { SignOutButton } from "@/components/SignOutButton";
-import { Logo } from "@/components/Logo";
 
-/**
- * Dashboard overview (Week 1 minimal version — wallet card + sign-out).
- * Funding, orders and tickets land here in Week 2/3.
- */
-export default async function DashboardPage() {
+/** Panel home — classic layout: navbar, stats row, New Order form. */
+export default async function PanelHome() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/app");
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("display_name, wallet_balance_kobo")
-    .eq("id", user.id)
-    .single();
+  const [{ data: profile }, { count: orderCount }, { data: categories }] = await Promise.all([
+    supabase.from("profiles").select("display_name, wallet_balance_kobo").eq("id", user.id).single(),
+    supabase.from("orders").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+    supabase.from("service_categories").select("id, name, slug").eq("is_active", true).order("sort_order"),
+  ]);
 
-  const name = profile?.display_name || "there";
+  const balance = profile?.wallet_balance_kobo ?? 0;
 
   return (
-    <div className="min-h-screen bg-cream-50">
-      <header className="border-b border-cream-200 bg-cream-50/90">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <Logo />
-          <SignOutButton />
-        </div>
-      </header>
-      <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-        <h1 className="font-display text-2xl font-bold tracking-tight text-ink sm:text-3xl">
-          Welcome, {name} 👋
-        </h1>
-        <p className="mt-2 text-ink-muted">Your account is live and your email is confirmed.</p>
-
-        <div className="mt-8 grid gap-5 sm:grid-cols-2">
-          <div className="rounded-[var(--radius-card)] bg-charcoal-900 p-7 text-ink-on-dark shadow-sm">
-            <p className="text-sm text-ink-on-dark-muted">Wallet balance</p>
-            <p className="mt-2 font-display text-4xl font-bold text-amber-glow-400">
-              {formatNairaFromKobo(profile?.wallet_balance_kobo ?? 0)}
-            </p>
-            <p className="mt-3 text-xs text-ink-on-dark-muted">
-              Funding (card & bank transfer) arrives in the next build phase.
+    <div className="min-h-screen bg-charcoal-950 text-ink-on-dark">
+      <PanelNav balanceKobo={balance} active="/app" />
+      <main className="mx-auto max-w-7xl px-3 py-6 sm:px-5">
+        <div className="mb-6 grid gap-4 sm:grid-cols-3">
+          <div className="rounded-[var(--radius-card)] border border-charcoal-700 bg-charcoal-900 p-5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-ink-on-dark-muted">Balance</p>
+            <p className="mt-1 font-display text-2xl font-bold text-amber-glow-400">
+              {formatNairaFromKobo(balance)}
             </p>
           </div>
-          <Link
-            href="/services"
-            className="group rounded-[var(--radius-card)] border border-cream-200 bg-surface-raised p-7 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-          >
-            <p className="font-display text-lg font-semibold text-ink group-hover:text-amber-glow-600">
-              Browse the catalogue →
+          <div className="rounded-[var(--radius-card)] border border-charcoal-700 bg-charcoal-900 p-5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-ink-on-dark-muted">Total orders</p>
+            <p className="mt-1 font-display text-2xl font-bold">{orderCount ?? 0}</p>
+          </div>
+          <div className="rounded-[var(--radius-card)] border border-charcoal-700 bg-charcoal-900 p-5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-ink-on-dark-muted">Account</p>
+            <p className="mt-1 truncate font-display text-lg font-semibold">
+              {profile?.display_name || user.email}
             </p>
-            <p className="mt-2 text-sm leading-relaxed text-ink-muted">
-              See every service and price across Instagram, TikTok, YouTube, X,
-              Facebook and Telegram.
-            </p>
-          </Link>
+          </div>
+        </div>
+
+        <div className="mx-auto max-w-2xl rounded-[var(--radius-card)] border border-charcoal-700 bg-charcoal-900 p-5 sm:p-7">
+          <h1 className="mb-5 font-display text-xl font-bold">New order</h1>
+          <NewOrderForm categories={categories ?? []} />
         </div>
       </main>
     </div>
