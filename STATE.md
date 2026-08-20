@@ -146,3 +146,35 @@ Append one dated entry per work session: built / verified / blocked / next.
 
 **Next action**
 - Once key lands: provider-test goes green → sync Owlet catalogue into `services` (provider_service_id mapping, auto margin pricing) → auto-forward paid orders → status polling back into order tracking.
+
+---
+
+## Session 5 — 2026-08-20 — Full catalogue sync + classic panel redesign
+
+**Done**
+- Owlet API key received and verified live (balance 100 NGN, 4,724 services).
+- Supabase service-role key received; stored in `.env.local` (server-only).
+- `scripts/owlet-sync-remote.mjs` — pulls live Owlet catalogue, classifies into 16 categories,
+  applies margin (customer ×1.18, reseller ×1.10, kobo ceiling), syncs via PostgREST.
+  **4,724/4,724 services live in `services` table, all active; margins spot-checked ×1.180.**
+- RLS negative tests still 11/11 PASS after sync.
+- Classic panel redesign (Owlet-classic structure, darker charcoal/amber skin):
+  - `PanelNav` — New order / Services / Orders / Add funds / API / Tickets + balance pill.
+  - `/app` — stats row + New Order form (Search → Category dropdown → Service dropdown →
+    Description → Link → Quantity → live charge → Place order).
+  - `/services` — classic dense table (ID, Service, Rate/1000, Min, Max, Refill, Description),
+    category dropdown + search + 50-row pagination (95 pages), server-side.
+  - `/app/orders` — order history table with status pills.
+  - `/app/funds`, `/app/api`, `/app/tickets` — placeholder pages (Paystack + tickets next phase).
+  - `POST /api/order` — atomic wallet charge via `place_order` RPC → automatic forward to Owlet
+    (`PanelV2.addOrder`) → stores `provider_order_id`; instant wallet refund if provider fails.
+  - `GET /api/catalogue?category=<uuid>` — services for the order form dropdown.
+- Smoke-tested live: /, /services (95 pages), /app (auth redirect), catalogue API. `tsc` clean.
+- Commits: `3ca008c` (catalogue sync), `c221421` (panel redesign).
+
+**Blocked (owner)**
+1. Paystack account (paystack.com signup) — needed for automatic Add funds.
+2. Optional: JAP API key as second provider.
+
+**Next action**
+- Paystack keys → wire Add funds page + webhook → then order status polling from Owlet.
