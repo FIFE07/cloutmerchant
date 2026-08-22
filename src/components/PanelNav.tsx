@@ -26,9 +26,9 @@ export function PanelNav({
   return (
     <header className="sticky top-0 z-40 border-b border-charcoal-700 bg-charcoal-900 text-ink-on-dark">
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-1 px-3 sm:px-5">
-        <Link href="/app" className="mr-3 shrink-0">
-          <Logo />
-        </Link>
+        <div className="mr-3 shrink-0">
+          <Logo dark />
+        </div>
         <nav className="hidden flex-1 items-center gap-1 overflow-x-auto md:flex">
           {LINKS.map((l) => (
             <Link

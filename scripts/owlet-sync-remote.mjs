@@ -29,6 +29,24 @@ const RULES = [
 ];
 const classify = (t) => (RULES.find(([re]) => re.test(t)) || [, "other"])[1];
 
+// Sub-category: clean engagement-type grouping (Followers / Likes / Views …)
+// derived from the provider's messy emoji-heavy category names.
+const SUB_RULES = [
+  [/live|broadcast/i, "Live"],
+  [/stor(y|ies)/i, "Stories"],
+  [/poll|vote/i, "Polls & Votes"],
+  [/\bdm\b|direct message|mass dm/i, "Messages (DM)"],
+  [/verif|blue ?tick|badge/i, "Verification"],
+  [/comment|mention|reply/i, "Comments & Mentions"],
+  [/like|reaction/i, "Likes & Reactions"],
+  [/view|watch|impression|reach|\bplay|stream|listen/i, "Views & Plays"],
+  [/follow|subscriber|member|join/i, "Followers & Members"],
+  [/share|repost|retweet|save|re-?post/i, "Shares & Saves"],
+  [/traffic|visitor|seo|backlink|website/i, "Website Traffic"],
+  [/pack|bundle|combo|growth|boost/i, "Packages & Boosts"],
+];
+const subClassify = (t) => (SUB_RULES.find(([re]) => re.test(t)) || [, "Other"])[1];
+
 console.log("Pulling live Owlet catalogue…");
 const res = await fetch("https://theowlet.com/api/v2", {
   method: "POST",
@@ -58,6 +76,7 @@ for (const s of list) {
   if (!cost || cost <= 0 || !min || !max || max < min) continue;
   rows.push({
     category_id: catId[classify(`${s.category} ${s.name}`)],
+    subcategory: subClassify(`${s.category} ${s.name}`),
     name: String(s.name).slice(0, 180),
     description: `${s.type} · ${s.category}`.slice(0, 300),
     provider: "owlet",

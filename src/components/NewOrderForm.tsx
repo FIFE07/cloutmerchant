@@ -9,6 +9,7 @@ type Service = {
   provider_service_id: string;
   name: string;
   description: string;
+  subcategory: string;
   price_per_1000_kobo: number;
   min_qty: number;
   max_qty: number;
@@ -16,12 +17,13 @@ type Service = {
 };
 
 /**
- * Classic panel "New Order" form — Search, Category dropdown, Service
- * dropdown, Description, Link, Quantity, live charge, Place order.
+ * Classic panel "New Order" form with a 3-level dropdown chain:
+ *   Category → Sub-category → Service → Link → Quantity → live charge.
  */
 export function NewOrderForm({ categories }: { categories: Category[] }) {
   const [categoryId, setCategoryId] = useState("");
   const [services, setServices] = useState<Service[]>([]);
+  const [subcategory, setSubcategory] = useState("");
   const [serviceId, setServiceId] = useState("");
   const [search, setSearch] = useState("");
   const [link, setLink] = useState("");
@@ -36,6 +38,7 @@ export function NewOrderForm({ categories }: { categories: Category[] }) {
       return;
     }
     setLoadingServices(true);
+    setSubcategory("");
     setServiceId("");
     fetch(`/api/catalogue?category=${encodeURIComponent(categoryId)}`)
       .then((r) => r.json())
@@ -44,13 +47,22 @@ export function NewOrderForm({ categories }: { categories: Category[] }) {
       .finally(() => setLoadingServices(false));
   }, [categoryId]);
 
-  const filtered = useMemo(() => {
+  const subcategories = useMemo(
+    () => [...new Set(services.map((s) => s.subcategory))].sort(),
+    [services],
+  );
+
+  const visibleServices = useMemo(() => {
+    let list = services;
+    if (subcategory) list = list.filter((s) => s.subcategory === subcategory);
     const q = search.trim().toLowerCase();
-    if (!q) return services;
-    return services.filter(
-      (s) => s.name.toLowerCase().includes(q) || s.provider_service_id.includes(q),
-    );
-  }, [services, search]);
+    if (q) {
+      list = list.filter(
+        (s) => s.name.toLowerCase().includes(q) || s.provider_service_id.includes(q),
+      );
+    }
+    return list;
+  }, [services, subcategory, search]);
 
   const service = services.find((s) => s.id === serviceId) ?? null;
   const qty = parseInt(quantity, 10);
@@ -97,25 +109,14 @@ export function NewOrderForm({ categories }: { categories: Category[] }) {
 
   const input =
     "w-full rounded-lg border border-charcoal-700 bg-charcoal-800 px-3 py-2.5 text-sm text-ink-on-dark placeholder:text-ink-on-dark-muted/60 focus:border-amber-glow-400 focus:outline-none";
+  const label =
+    "mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-on-dark-muted";
 
   return (
     <form onSubmit={placeOrder} className="space-y-4">
+      {/* Step 1 — Category */}
       <div>
-        <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-on-dark-muted">
-          Search
-        </label>
-        <input
-          className={input}
-          placeholder="Search services by name or ID…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
-
-      <div>
-        <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-on-dark-muted">
-          Category
-        </label>
+        <label className={label}>1 · Category</label>
         <select
           className={input}
           value={categoryId}
@@ -131,25 +132,58 @@ export function NewOrderForm({ categories }: { categories: Category[] }) {
         </select>
       </div>
 
+      {/* Step 2 — Sub-category */}
       <div>
-        <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-on-dark-muted">
-          Service
-        </label>
+        <label className={label}>2 · Sub-category</label>
         <select
           className={input}
-          value={serviceId}
-          onChange={(e) => setServiceId(e.target.value)}
+          value={subcategory}
+          onChange={(e) => {
+            setSubcategory(e.target.value);
+            setServiceId("");
+          }}
           disabled={!categoryId || loadingServices}
           required
         >
           <option value="">
             {loadingServices
-              ? "Loading services…"
+              ? "Loading…"
               : !categoryId
                 ? "Pick a category first"
-                : `— Choose a service (${filtered.length}) —`}
+                : "— Choose a sub-category —"}
           </option>
-          {filtered.map((s) => (
+          {subcategories.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Step 3 — Service (with optional search) */}
+      <div>
+        <label className={label}>3 · Service</label>
+        {subcategory && visibleServices.length > 25 && (
+          <input
+            className={`${input} mb-2`}
+            placeholder="Type to narrow the list…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        )}
+        <select
+          className={input}
+          value={serviceId}
+          onChange={(e) => setServiceId(e.target.value)}
+          disabled={!subcategory}
+          required
+        >
+          <option value="">
+            {!subcategory
+              ? "Pick a sub-category first"
+              : `— Choose a service (${visibleServices.length}) —`}
+          </option>
+          {visibleServices.map((s) => (
             <option key={s.id} value={s.id}>
               {s.provider_service_id} — {s.name} — {formatNairaFromKobo(s.price_per_1000_kobo)}/1000
             </option>
@@ -159,7 +193,6 @@ export function NewOrderForm({ categories }: { categories: Category[] }) {
 
       {service && (
         <div className="rounded-lg border border-charcoal-700 bg-charcoal-800/60 p-3 text-xs leading-relaxed text-ink-on-dark-muted">
-          <p className="mb-1 font-semibold text-ink-on-dark">Description</p>
           <p>{service.description || "No extra description for this service."}</p>
           <p className="mt-2">
             Min {service.min_qty.toLocaleString()} · Max {service.max_qty.toLocaleString()} ·{" "}
@@ -172,9 +205,7 @@ export function NewOrderForm({ categories }: { categories: Category[] }) {
       )}
 
       <div>
-        <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-on-dark-muted">
-          Link
-        </label>
+        <label className={label}>4 · Link</label>
         <input
           className={input}
           type="url"
@@ -186,9 +217,7 @@ export function NewOrderForm({ categories }: { categories: Category[] }) {
       </div>
 
       <div>
-        <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-ink-on-dark-muted">
-          Quantity
-        </label>
+        <label className={label}>5 · Quantity</label>
         <input
           className={input}
           type="number"
