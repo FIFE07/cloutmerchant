@@ -178,3 +178,23 @@ Append one dated entry per work session: built / verified / blocked / next.
 
 **Next action**
 - Paystack keys → wire Add funds page + webhook → then order status polling from Owlet.
+
+---
+
+## Session 6 — 2026-08-22 — Sub-categories, tier badges, hydration fix
+
+- Fixed nested `<Link>` hydration error in `PanelNav` (Logo renders its own link; use `<Logo dark />`).
+- Migration 0003: `services.subcategory` + index. Sub-category classifier (12 clean labels:
+  Followers & Members, Likes & Reactions, Views & Plays, Comments & Mentions, Live, Stories,
+  Polls & Votes, Messages (DM), Verification, Shares & Saves, Website Traffic, Packages & Boosts, Other).
+- Migration 0004: `services.tier` (free/budget/standard/premium) — computed per
+  (category, sub-category) price position: cheapest 20% → budget, top 15% → premium (groups ≥5).
+- NewOrderForm: numbered 5-step flow — Category → Sub-category → Service (badge prefix +
+  search-narrow box when >25) → Link → Quantity; explanation box shows tier meaning,
+  refill meaning, min/max, live charge.
+- /services table: tier emoji + sub-category chip + badge legend.
+- Re-synced: 4,731 services live. tsc clean, pages 200/307 as expected.
+- Commit `ea9f8a0` + this session's commit.
+
+**Payments plan (owner accounts pending)**: Paystack (NG/Africa cards+bank+USSD), Stripe (UK/EU cards),
+Flutterwave optional later. Webhooks → `credit_wallet` RPC (idempotent by reference).

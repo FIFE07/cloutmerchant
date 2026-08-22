@@ -37,7 +37,7 @@ export default async function ServicesPage({
 
   let query = supabase
     .from("services")
-    .select("id, provider_service_id, name, description, price_per_1000_kobo, min_qty, max_qty, refill, category_id", { count: "exact" })
+    .select("id, provider_service_id, name, description, subcategory, tier, price_per_1000_kobo, min_qty, max_qty, refill, category_id", { count: "exact" })
     .eq("is_active", true)
     .order("provider_service_id");
 
@@ -115,8 +115,11 @@ export default async function ServicesPage({
                     {s.provider_service_id}
                   </td>
                   <td className="max-w-[340px] px-3 py-2.5">
+                    <span className="mr-1" title={s.tier}>
+                      {s.tier === "premium" ? "👑" : s.tier === "budget" ? "💰" : s.tier === "free" ? "🎁" : "⭐"}
+                    </span>
                     <span className="mr-2 rounded bg-charcoal-800 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-teal-pop-300">
-                      {catById.get(s.category_id)?.name ?? ""}
+                      {s.subcategory}
                     </span>
                     {s.name}
                   </td>
@@ -147,6 +150,11 @@ export default async function ServicesPage({
             </tbody>
           </table>
         </div>
+
+        <p className="mt-3 text-xs text-ink-on-dark-muted">
+          Badge guide: 👑 Premium = highest quality, lowest drop · ⭐ Standard = balanced ·
+          💰 Budget = cheapest, drops can happen · 🎁 Free · ✓ Refill = dropped numbers are replaced.
+        </p>
 
         {/* Pagination */}
         <div className="mt-4 flex items-center justify-between">

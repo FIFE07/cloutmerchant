@@ -77,6 +77,7 @@ for (const s of list) {
   rows.push({
     category_id: catId[classify(`${s.category} ${s.name}`)],
     subcategory: subClassify(`${s.category} ${s.name}`),
+    _cost: cost, // used for tiering, stripped before insert
     name: String(s.name).slice(0, 180),
     description: `${s.type} · ${s.category}`.slice(0, 300),
     provider: "owlet",
@@ -87,6 +88,26 @@ for (const s of list) {
     refill: s.refill === true || s.refill === "true",
     is_active: true,
   });
+}
+
+// Tier badges — computed per (category + sub-category) from price position:
+// cheapest 20% → 💰 Budget · top 15% → 👑 Premium · rest → Standard.
+// (Refill/no-drop is shown separately from the refill flag.)
+const groups = new Map();
+for (const r of rows) {
+  const k = `${r.category_id}|${r.subcategory}`;
+  (groups.get(k) ?? groups.set(k, []).get(k)).push(r);
+}
+for (const g of groups.values()) {
+  const costs = g.map((r) => r._cost).sort((a, b) => a - b);
+  const p20 = costs[Math.floor(costs.length * 0.2)] ?? costs[0];
+  const p85 = costs[Math.floor(costs.length * 0.85)] ?? costs.at(-1);
+  for (const r of g) {
+    r.tier = g.length >= 5 && r._cost <= p20 ? "budget"
+      : g.length >= 5 && r._cost >= p85 ? "premium"
+      : "standard";
+    delete r._cost;
+  }
 }
 
 const B = 400;

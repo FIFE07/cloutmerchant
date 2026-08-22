@@ -11,7 +11,7 @@ export async function GET(req: Request) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("services")
-    .select("id, provider_service_id, name, description, subcategory, price_per_1000_kobo, min_qty, max_qty, refill")
+    .select("id, provider_service_id, name, description, subcategory, tier, price_per_1000_kobo, min_qty, max_qty, refill")
     .eq("category_id", category)
     .eq("is_active", true)
     .order("price_per_1000_kobo")

@@ -10,10 +10,28 @@ type Service = {
   name: string;
   description: string;
   subcategory: string;
+  tier: "free" | "budget" | "standard" | "premium";
   price_per_1000_kobo: number;
   min_qty: number;
   max_qty: number;
   refill: boolean;
+};
+
+const TIER_BADGE: Record<Service["tier"], string> = {
+  free: "🎁",
+  budget: "💰",
+  standard: "⭐",
+  premium: "👑",
+};
+
+const TIER_EXPLAINER: Record<Service["tier"], string> = {
+  free: "🎁 Free — costs nothing. Good for testing how delivery works.",
+  budget:
+    "💰 Budget — the cheapest option in this group. Great for big numbers on a tight budget. Drops can happen, so avoid it for accounts you can't afford to lose numbers on.",
+  standard:
+    "⭐ Standard — balanced quality and price. The safe everyday choice for most orders.",
+  premium:
+    "👑 Premium — the highest quality in this group: real-looking profiles, slowest delivery, lowest drop. Best for business pages and important accounts.",
 };
 
 /**
@@ -185,7 +203,7 @@ export function NewOrderForm({ categories }: { categories: Category[] }) {
           </option>
           {visibleServices.map((s) => (
             <option key={s.id} value={s.id}>
-              {s.provider_service_id} — {s.name} — {formatNairaFromKobo(s.price_per_1000_kobo)}/1000
+              {TIER_BADGE[s.tier]} {s.provider_service_id} — {s.name} — {formatNairaFromKobo(s.price_per_1000_kobo)}/1000
             </option>
           ))}
         </select>
@@ -193,10 +211,11 @@ export function NewOrderForm({ categories }: { categories: Category[] }) {
 
       {service && (
         <div className="rounded-lg border border-charcoal-700 bg-charcoal-800/60 p-3 text-xs leading-relaxed text-ink-on-dark-muted">
+          <p className="mb-1 font-semibold text-ink-on-dark">{TIER_EXPLAINER[service.tier]}</p>
           <p>{service.description || "No extra description for this service."}</p>
           <p className="mt-2">
             Min {service.min_qty.toLocaleString()} · Max {service.max_qty.toLocaleString()} ·{" "}
-            {service.refill ? "Refill available" : "No refill"} ·{" "}
+            {service.refill ? "✓ Refill protected (if numbers drop, they are topped back up)" : "No refill (if numbers drop, they are not replaced)"} ·{" "}
             <span className="text-amber-glow-400">
               {formatNairaFromKobo(service.price_per_1000_kobo)} per 1000
             </span>
