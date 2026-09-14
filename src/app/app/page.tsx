@@ -43,7 +43,7 @@ export default async function PanelHome() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-2xl rounded-[var(--radius-card)] border border-charcoal-700 bg-charcoal-900 p-5 sm:p-7">
+        <div className="rounded-[var(--radius-card)] border border-charcoal-700 bg-charcoal-900 p-5 sm:p-7">
           <h1 className="mb-5 font-display text-xl font-bold">New order</h1>
           <NewOrderForm categories={categories ?? []} />
         </div>

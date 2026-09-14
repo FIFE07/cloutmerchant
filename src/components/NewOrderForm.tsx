@@ -25,13 +25,10 @@ const TIER_BADGE: Record<Service["tier"], string> = {
 };
 
 const TIER_EXPLAINER: Record<Service["tier"], string> = {
-  free: "🎁 Free — costs nothing. Good for testing how delivery works.",
-  budget:
-    "💰 Budget — the cheapest option in this group. Great for big numbers on a tight budget. Drops can happen, so avoid it for accounts you can't afford to lose numbers on.",
-  standard:
-    "⭐ Standard — balanced quality and price. The safe everyday choice for most orders.",
-  premium:
-    "👑 Premium — the highest quality in this group: real-looking profiles, slowest delivery, lowest drop. Best for business pages and important accounts.",
+  free: "🎁 Free — costs nothing. Good for testing.",
+  budget: "💰 Budget — cheapest option. Drops can happen.",
+  standard: "⭐ Standard — balanced quality and price.",
+  premium: "👑 Premium — highest quality, lowest drop.",
 };
 
 /**
@@ -69,6 +66,8 @@ export function NewOrderForm({ categories }: { categories: Category[] }) {
     () => [...new Set(services.map((s) => s.subcategory))].sort(),
     [services],
   );
+
+  const categoryName = categories.find((c) => c.id === categoryId)?.name ?? "";
 
   const visibleServices = useMemo(() => {
     let list = services;
@@ -134,7 +133,7 @@ export function NewOrderForm({ categories }: { categories: Category[] }) {
     <form onSubmit={placeOrder} className="space-y-4">
       {/* Step 1 — Category */}
       <div>
-        <label className={label}>1 · Category</label>
+        <label className={label}>Category</label>
         <select
           className={input}
           value={categoryId}
@@ -152,7 +151,7 @@ export function NewOrderForm({ categories }: { categories: Category[] }) {
 
       {/* Step 2 — Sub-category */}
       <div>
-        <label className={label}>2 · Sub-category</label>
+        <label className={label}>Sub-category</label>
         <select
           className={input}
           value={subcategory}
@@ -172,7 +171,7 @@ export function NewOrderForm({ categories }: { categories: Category[] }) {
           </option>
           {subcategories.map((s) => (
             <option key={s} value={s}>
-              {s}
+              {categoryName} {s}
             </option>
           ))}
         </select>
@@ -180,7 +179,7 @@ export function NewOrderForm({ categories }: { categories: Category[] }) {
 
       {/* Step 3 — Service (with optional search) */}
       <div>
-        <label className={label}>3 · Service</label>
+        <label className={label}>Service</label>
         {subcategory && visibleServices.length > 25 && (
           <input
             className={`${input} mb-2`}
@@ -211,11 +210,10 @@ export function NewOrderForm({ categories }: { categories: Category[] }) {
 
       {service && (
         <div className="rounded-lg border border-charcoal-700 bg-charcoal-800/60 p-3 text-xs leading-relaxed text-ink-on-dark-muted">
-          <p className="mb-1 font-semibold text-ink-on-dark">{TIER_EXPLAINER[service.tier]}</p>
-          <p>{service.description || "No extra description for this service."}</p>
-          <p className="mt-2">
+          <p className="font-semibold text-ink-on-dark">{TIER_EXPLAINER[service.tier]}</p>
+          <p className="mt-1">
             Min {service.min_qty.toLocaleString()} · Max {service.max_qty.toLocaleString()} ·{" "}
-            {service.refill ? "✓ Refill protected (if numbers drop, they are topped back up)" : "No refill (if numbers drop, they are not replaced)"} ·{" "}
+            {service.refill ? "✓ Refill protected" : "No refill"} ·{" "}
             <span className="text-amber-glow-400">
               {formatNairaFromKobo(service.price_per_1000_kobo)} per 1000
             </span>
@@ -224,7 +222,7 @@ export function NewOrderForm({ categories }: { categories: Category[] }) {
       )}
 
       <div>
-        <label className={label}>4 · Link</label>
+        <label className={label}>Link</label>
         <input
           className={input}
           type="url"
@@ -236,7 +234,7 @@ export function NewOrderForm({ categories }: { categories: Category[] }) {
       </div>
 
       <div>
-        <label className={label}>5 · Quantity</label>
+        <label className={label}>Quantity</label>
         <input
           className={input}
           type="number"

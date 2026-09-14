@@ -77,8 +77,8 @@ export function ServicesMegaMenu({ columns }: { columns: MegaMenuColumn[] }) {
                   {col.name}
                 </Link>
                 <ul className="mt-3 space-y-1">
-                  {col.items.map((item) => (
-                    <li key={item.href}>
+                  {col.items.map((item, idx) => (
+                    <li key={`${item.href}-${idx}`}>
                       <Link
                         href={item.href}
                         onClick={() => setOpen(false)}
