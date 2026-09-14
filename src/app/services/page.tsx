@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
+import { PanelNav } from "@/components/PanelNav";
 import { createClient } from "@/lib/supabase/server";
 import { formatNairaFromKobo } from "@/lib/format";
 
@@ -10,7 +11,8 @@ export const metadata: Metadata = {
     "Every CLOUTMERCHANT service with live prices per 1000, min/max quantities and refill availability.",
 };
 
-export const revalidate = 300;
+// Page reads the auth cookie to decide which nav to show → always dynamic.
+export const dynamic = "force-dynamic";
 const PAGE_SIZE = 50;
 
 /**
@@ -25,6 +27,14 @@ export default async function ServicesPage({
   const { category = "all", q = "", page = "1" } = await searchParams;
   const pageNum = Math.max(1, parseInt(page, 10) || 1);
   const supabase = await createClient();
+
+  // If the visitor is signed in, keep the panel navigation (balance pill etc.)
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { data: me } = user
+    ? await supabase.from("profiles").select("wallet_balance_kobo").eq("id", user.id).single()
+    : { data: null };
 
   const { data: categories } = await supabase
     .from("service_categories")
@@ -59,7 +69,11 @@ export default async function ServicesPage({
 
   return (
     <div className="flex min-h-screen flex-col bg-charcoal-950 text-ink-on-dark">
-      <SiteHeader />
+      {user ? (
+        <PanelNav balanceKobo={me?.wallet_balance_kobo ?? 0} active="/services" />
+      ) : (
+        <SiteHeader />
+      )}
       <main className="mx-auto w-full max-w-7xl flex-1 px-3 py-8 sm:px-5">
         <h1 className="font-display text-2xl font-bold">Services</h1>
 
